@@ -23,3 +23,62 @@ def all_grid_neighbours(grid):
 
 def path_to_word(grid, path):
     return ''.join([grid[p] for p in path])
+
+def is_a_real_word(word, dictionary):
+    return word in dictionary
+
+def search(grid, dictionary):
+    neighbours = all_grid_neighbours(grid)
+    paths = []
+    full_words, stems = dictionary
+    def do_search(path):
+        word = path_to_word(grid, path)
+        if is_a_real_word(word, full_words):
+            paths.append(path)
+        if word not in stems:
+            return
+        for next_pos in neighbours[path[-1]]:
+            if next_pos not in path:
+                do_search(path + [next_pos])
+    
+    for position in grid:
+        do_search([position])
+    words = []
+    for path in paths:
+        words.append(path_to_word(grid, path))
+    return set(words)
+
+def get_dictionary(dictionary_file):
+    full_words, stems = set(), set()
+
+    with open(dictionary_file) as f:
+        for word in f:
+            word = word.strip().upper()
+            full_words.add(word)
+
+            for i in range(1, len(word)):
+                stems.add(word[:i])
+        return full_words, stems
+
+def display_words(words):
+    for word in words:
+        print(word)
+    print("Found {0} words".format(len(words)))
+
+def display_grid(grid, rows, cols):
+    for r in range(rows):
+        letters_this_row = []
+        for c in range(cols):
+            letters_this_row.append(grid[r, c])
+        this_row_as_text = "|".join(letters_this_row)
+        print(this_row_as_text)
+
+def main(x, y):
+    dictionary = get_dictionary('C:/Users/danie/Desktop/CodeInstitute/Stream 2/pythonChallenges/boggle-ClassRoomSolution/dictionary.txt')
+    grid = make_grid(x, y)
+    display_grid(grid, x, y)
+    words = search(grid, dictionary)
+    display_words(words)
+
+
+main(500, 500)
